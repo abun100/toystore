@@ -11,17 +11,18 @@
 	 		  - Return the order info
 	 */
 
-	 function get_order_info(PDO $pdo, string $email, string $orderNum) {
-			// Prepare SQL query to retrieve customer and order info
-			$sql = "SELECT * 
-							FROM customer
-							JOIN orders ON customer.custnum = orders.custnum 
-							WHERE customer.email= :email AND orders.ordernum= :orderNum";
-			
-			$orderInfo = pdo($pdo, $sql, ['email' => $email, 'orderNum' => $orderNum])->fetch();
+	 function getOrderInfo($email, $orderNum, $pdo) {
+		$sql = "SELECT customer.*, orders.*
+				FROM customer
+				JOIN orders ON customer.custnum = orders.custnum
+				WHERE customer.email = :email AND orders.ordernum = :orderNum";
 
-			return $orderInfo;
-		}
+		$stmt = $pdo->prepare($sql);
+		$stmt->execute(['email' => $email, 'orderNum' => $orderNum]);
+		$orderInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+		return $orderInfo;
+	 }
 
 	
 	// Check if the request method is POST (i.e, form submitted)
@@ -33,11 +34,12 @@
 		// Retrieve the value of the 'orderNum' field from the POST data
 		$orderNum = $_POST['orderNum'];
 
+
 		/*
 		 * TO-DO: Retrieve info about order from the db using provided PDO connection
 		 */
-
-		$orderInfo = get_order_info($pdo, $email, $orderNum);
+		$orderInfo = getOrderInfo($email, $orderNum, $pdo);
+		
 	}
 // Closing PHP tag  ?> 
 

@@ -8,6 +8,7 @@
 	$toy_id = $_GET['toynum'];
 
 
+
 	/*
 	 * TO-DO: Define a function that retrieves ALL toy and manufacturer info from the database based on the toynum parameter from the URL query string.
 	 		  - Write SQL query to retrieve ALL toy and manufacturer info based on toynum
@@ -17,34 +18,21 @@
 	 		  Retrieve info about toy from the db using provided PDO connection
 	 */
 
-	 function get_info(PDO $pdo, string $id) {
-			// SQL query to retrieve toy information based on the toy ID
-			$sql = "SELECT * 
-				FROM toy
-				WHERE toynum= :id;";
-				
-			$toy = pdo($pdo, $sql, ['id' => $id])->fetch();		// Associative array where 'id' is the key and $id is the value. Used to bind the value of $id to the placeholder :id in  SQL query.
+	 function getToyInfo($toy_id, $pdo) {
+		$sql = "SELECT toy.*, manuf.name AS manuf_name, manuf.street, manuf.phone, manuf.contact, manuf.city, manuf.State, manuf.ZipCode 
+				From toy
+				JOIN manuf ON toy.manid = manuf.manid
+				WHERE toy.toynum = :toy_id";
+		
+		$stmt = $pdo-> prepare($sql);
+		$stmt->execute(['toy_id' => $toy_id]);
+		$toyInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $toyInfo;
 
-			// Return the toy information (associative array)
-			return $toy;
 	 }
 
-	 function get_man(PDO $pdo, string $id) {
-		// SQL query to retrieve toy information based on the toy ID
-		$sql = "SELECT * 
-			FROM toy
-			JOIN manuf ON toy.manid=manuf.manid
-			WHERE toynum= :id;";
-			
-		$toy = pdo($pdo, $sql, ['id' => $id])->fetch();		// Associative array where 'id' is the key and $id is the value. Used to bind the value of $id to the placeholder :id in  SQL query.
 
-		// Return the toy information (associative array)
-		return $toy;
- }
-
-	 // Retrieve info about toy with ID '0001' from the db using provided PDO connection
-	$toy1 = get_info($pdo, $toy_id);
-	$toy1_man = get_man($pdo, $toy_id);
+	 $toyInfo = getToyInfo($toy_id, $pdo);
 
 // Closing PHP tag  ?> 
 
@@ -92,45 +80,45 @@
 			<div class="toy-details-container">
 				<div class="toy-image">
 					<!-- Display image of toy with its name as alt text -->
-					<img src="<?= $toy1['imgSrc'] ?>" alt="<?= $toy1['name'] ?>">
+					<img src="<?= $toyInfo['imgSrc'] ?>" alt="<?= $toyInfo['name'] ?>">
 				</div>
 
 				<div class="toy-details">
 
 					<!-- Display name of toy -->
-			        <h1><?= $toy1['name'] ?></h1>
+			        <h1><?= $toyInfo['name'] ?></h1>
 
 			        <hr />
 
 			        <h3>Toy Information</h3>
 
 			        <!-- Display description of toy -->
-			        <p><strong>Description:</strong> <?= $toy1['description'] ?></p>
+			        <p><strong>Description:</strong> <?= $toyInfo['description'] ?></p>
 
 			        <!-- Display price of toy -->
-			        <p><strong>Price:</strong> $ <?= $toy1['price'] ?></p>
+			        <p><strong>Price:</strong> $ <?= $toyInfo['price'] ?></p>
 
 			        <!-- Display age range of toy -->
-			        <p><strong>Age Range:</strong> <?= $toy1['agerange'] ?></p>
+			        <p><strong>Age Range:</strong> <?= $toyInfo['agerange'] ?></p>
 
 			        <!-- Display stock of toy -->
-			        <p><strong>Number In Stock:</strong> <?= $toy1['numinstock'] ?></p>
+			        <p><strong>Number In Stock:</strong> <?= $toyInfo['numinstock'] ?></p>
 
 			        <br />
 
 			        <h3>Manufacturer Information</h3>
 
 			        <!-- Display name of manufacturer -->
-			        <p><strong>Name:</strong> <?= $toy1_man['name'] ?> </p>
+			        <p><strong>Name:</strong> <?= $toyInfo['manuf_name'] ?> </p>
 
 			        <!-- Display address of manufacturer -->
-			        <p><strong>Address:</strong> <?= $toy1_man['Street'] ?></p>
+			        <p><strong>Address:</strong> <?= $toyInfo['street'], ", ", $toyInfo['city'], ", ", $toyInfo['State'], " ", $toyInfo['ZipCode'] ?></p>
 
 			        <!-- Display phone of manufacturer -->
-			        <p><strong>Phone:</strong> <?= $toy1_man['phone'] ?></p>
+			        <p><strong>Phone:</strong> <?= $toyInfo['phone'] ?></p>
 
 			        <!-- Display contact of manufacturer -->
-			        <p><strong>Contact:</strong> <?= $toy1_man['contact'] ?></p>
+			        <p><strong>Contact:</strong> <?= $toyInfo['contact'] ?></p>
 			    </div>
 			</div>
 		</main>
